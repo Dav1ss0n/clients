@@ -1,0 +1,18 @@
+.radio-navbar-search {
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+
+    background-color: darkgray;
+    mask-image: url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='darkgray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0.133301 14C0.133301 21.6583 6.34162 27.8666 14 27.8666C21.6583 27.8666 27.8666 21.6583 27.8666 14C27.8666 6.34162 21.6583 0.133301 14 0.133301C6.34162 0.133301 0.133301 6.34162 0.133301 14ZM20.4 7.59997L17.2 17.2L7.59997 20.4L10.8 10.8L20.4 7.59997Z' fill='%238E8E93'/%3E%3C/svg%3E%0A");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='28' height='28' viewBox='0 0 28 28' fill='darkgray' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0.133301 14C0.133301 21.6583 6.34162 27.8666 14 27.8666C21.6583 27.8666 27.8666 21.6583 27.8666 14C27.8666 6.34162 21.6583 0.133301 14 0.133301C6.34162 0.133301 0.133301 6.34162 0.133301 14ZM20.4 7.59997L17.2 17.2L7.59997 20.4L10.8 10.8L20.4 7.59997Z' fill='%238E8E93'/%3E%3C/svg%3E%0A");
+}
+
+input[type="radio"]:checked + .radio-navbar-search {
+    background-color: wheat !important;
+}
+
+input[type="radio"] {
+    visibility: hidden;
+    display: none;
+}
