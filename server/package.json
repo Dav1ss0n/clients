@@ -26,5 +26,8 @@
     "uuid": "^8.3.2"
   },
   "keywords": [],
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
 }
