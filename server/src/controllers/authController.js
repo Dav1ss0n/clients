@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const {validationResult} = require('express-validator');
 const User = require('../models/userModel');
 const tokenService = require("../services/tokenService");
+const logger = require("../logger");
 
 const authController = {};
 
@@ -90,7 +91,7 @@ authController.login = async (req, res) => {
             return res
                 .status(401)
                 .json({
-                    message: 'Invalid email or username'
+                    message: 'Invalid email or password'
                 });
         }
 
@@ -100,7 +101,7 @@ authController.login = async (req, res) => {
             return res
                 .status(401)
                 .json({
-                    message: 'Invalid password'
+                    message: 'Invalid email or password'
                 });
         }
 
@@ -119,6 +120,7 @@ authController.login = async (req, res) => {
             maxAge: 365 * 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
 
+        logger.error(`User {${email}} has succesfully logged in`);
         return res.json({
             message: 'Login successful'
         });
