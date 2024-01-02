@@ -57,13 +57,14 @@ class ApiController {
                 maxAge: 365 * 24 * 60 * 60 * 1000 // 1 day in milliseconds
             });
 
+            logger.info(`New business account {${email}} was succesfully created`);
             return res
                 .status(201)
                 .json({
                     message: 'Account created successfully'
                 });
         } catch (err) {
-            console.error(err);
+            logger.error("Error in business account creating system");
             return res
                 .status(500)
                 .json({
@@ -134,6 +135,7 @@ class ApiController {
             });
             await newBusiness.save();
 
+            logger.info(`New business {${accountID}} was succesfully created`);
             return res
                 .status(201)
                 .json({
@@ -141,7 +143,7 @@ class ApiController {
                 });
 
         } catch (err) {
-            console.error(err);
+            logger.error("Error in business creating system");
             return res
                 .status(500)
                 .json({
@@ -177,12 +179,13 @@ class ApiController {
             // receiving account data from database
             const existingAccount = await User.findOne({_id: accountId}).select('-password').exec();
             account.data = existingAccount;
-
+            
+            logger.info(`Data of user {${accountId}} was received`);
             return res
                 .status(200)
                 .json(account);
         } catch (err) {
-            console.error(err);
+            logger.error(`Error in user data receiving system`);
             return res
                 .status(500)
                 .json({
@@ -211,13 +214,14 @@ class ApiController {
                 })
             );
 
+            logger.info(`List of businesses was received`);
             return res
                 .status(200)
                 .json(
                     dataToSend
                 );
         } catch (err) {
-            console.error(err);
+            logger.error(`Error in businesses list receiving system`);
             return res
                 .status(500)
                 .json({
@@ -241,13 +245,14 @@ class ApiController {
 
             const result = await Business.findOneAndUpdate({ownerId: accountId}, {$set: updatedFields});
 
+            logger.info(`Data of user {${accountId}} was edited`);
             return res
                 .status(200)
                 .json({
                     result
                 });
         } catch (err) {
-            console.error(err);
+            logger.error(`Error in business editing system`);
             return res
                 .status(500)
                 .json({

@@ -54,13 +54,14 @@ authController.register = async (req, res) => {
             maxAge: 365 * 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
 
+        logger.info(`New user {${email}} was succesfully created`);
         return res
             .status(201)
             .json({
                 message: 'User created successfully'
             });
     } catch (err) {
-        console.error(err);
+        logger.error("Error in registration system");
         return res
             .status(500)
             .json({
@@ -120,12 +121,12 @@ authController.login = async (req, res) => {
             maxAge: 365 * 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
 
-        logger.error(`User {${email}} has succesfully logged in`);
+        logger.info(`User {${email}} has succesfully logged in`);
         return res.json({
             message: 'Login successful'
         });
     } catch (err) {
-        console.error(err);
+        logger.error("Error in login system");
         return res
             .status(500)
             .json({
@@ -146,7 +147,7 @@ authController.logout = (req, res) => {
             message: 'Logout successful'
         });
     } catch (err) {
-        console.error(err);
+        logger.error("Error in logout system");
         return res
             .status(500)
             .json({
