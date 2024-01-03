@@ -16,17 +16,9 @@ router.use(multer().array());
 // registration route
 router.post(
     '/register',
-    body('email')
-        .isEmail()
-        .withMessage('Invalid email address'),
-    body('password')
-        .trim()
-        .isLength({ min: 6 })
-        .withMessage('Password must be at least 6 characters'),
-    body('username')
-        .trim()
-        .isLength({ min: 1 })
-        .withMessage('Username is required'),
+    body('email').isEmail().withMessage('Invalid email address'),
+    body('password').trim().isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    body('username').trim().isLength({ min: 3 }).withMessage('Username is required'),
     authController.register
 );
 

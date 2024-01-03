@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken"),
-  secret = process.env.JWT_SECRET;
+  secret = process.env.JWT_SECRET,
+  responser = require("../responser.js");
 
 module.exports = function (roles) {
   return function (req, res, next) {
@@ -9,9 +10,7 @@ module.exports = function (roles) {
 
     try {
       if (!req.cookies || !req.cookies.token) {
-        return res.status(401).json({
-          message: "Unauthorized",
-        });
+        responser.Unauthorized(res, "");
       }
       const token = req.cookies.token;
 
@@ -34,10 +33,7 @@ module.exports = function (roles) {
       next();
     } catch (e) {
       console.error(e);
-      return res.status(500).json({
-        message: "Server error",
-        ini: "Role Middleware",
-      });
+      responser.InternalServerError(res, "Role Middleware");
     }
   };
 };

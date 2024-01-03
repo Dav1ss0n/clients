@@ -1,4 +1,5 @@
 const express = require("express");
+const multer = require("multer");
 const businessRouter = require("./api/businessRouter");
 const employeeRouter = require("./api/employeeRouter");
 const userRouter = require("./api/userRouter");
@@ -6,6 +7,7 @@ const userRouter = require("./api/userRouter");
 
 
 const router = express.Router();
+router.use(multer().array());
 
 
 
