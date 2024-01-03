@@ -3,7 +3,7 @@ const { transports } = winston;
 require("winston-mongodb");
 const mongoose = require("mongoose");
 
-const { combine, timestamp, json, metadata } = winston.format;
+const { combine, timestamp, json, metadata, errors } = winston.format;
 
 
 const errorFilter = winston.format((info, opts) => {
@@ -19,6 +19,7 @@ const logger = winston.createLogger({
   level: 'info',
 
   format: combine(
+    errors({ stack: true }),
     timestamp({
       format: 'YYYY-MM-DD HH:mm:ss Z',
     }),

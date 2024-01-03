@@ -2,7 +2,6 @@ const express = require("express");
 const { body } = require('express-validator');
 const authController = require('../controllers/authController');
 const multer = require('multer');
-const accessMiddleware = require("../middlewares/operatorMiddleware");
 
 
 
@@ -28,22 +27,24 @@ router.post(
         .trim()
         .isLength({ min: 1 })
         .withMessage('Username is required'),
-    accessMiddleware,
     authController.register
-  );
-  
-  // login route
-  router.post(
-    '/login',
-    [
-      body('email').isEmail().withMessage('Invalid email address'),
-      body('password').trim().isLength({min: 6}).withMessage('Password must be longer than 6 characters'),
-    ],
-    authController.login
-  );
-  
-  // logout route
-  router.post('/logout', authController.logout);
+);
+
+// login route
+router.post(
+  '/login',
+  [
+    body('email').isEmail().withMessage('Invalid email address'),
+    body('password').trim().isLength({min: 6}).withMessage('Password must be longer than 6 characters'),
+  ],
+  authController.login
+);
+
+// logout route
+router.post(
+  '/logout',
+  authController.logout
+);
 
 
 

@@ -1,8 +1,8 @@
 const express = require("express");
 const multer = require("multer");
 const {body} = require('express-validator');
-const roleMiddleware = require('../..//middlewares/roleMiddleware');
-const clerkController = require("../../controllers/clerkController");
+const roleMiddleware = require('../../middlewares/roleMiddleware');
+const employeeController = require("../../controllers/employeeController");
 
 
 
@@ -29,7 +29,7 @@ router.post(
         body("bio").isLength({min:4, max: 120})
     ],
     roleMiddleware(['Business']),
-    clerkController.add
+    employeeController.add
 );
 
 router.post(
@@ -40,7 +40,7 @@ router.post(
         body('email').isEmail().withMessage('Email is required'),
     ],
     roleMiddleware(['Staff', 'Head Staff']),
-    clerkController.add
+    employeeController.add
 );
 
 router.post(
@@ -50,12 +50,12 @@ router.post(
         body('name').isLength({min: 4}).withMessage('Name is required'),
     ],
     roleMiddleware(['Business', 'Staff', 'Head Staff']),
-    clerkController.edit
+    employeeController.edit
 );
 
 router.delete(
     '/delete/@:clerkId', 
-    clerkController.delete
+    employeeController.delete
 );
 
 router.use("/", (req, res) => {

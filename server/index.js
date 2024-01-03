@@ -7,6 +7,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const path = require("path");
 // *? const { fileURLToPath } = require("url");
 const authRouter = require("./src/router/authRouter");
@@ -23,6 +24,7 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("combined"));
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
+app.use(cookieParser());
 app.use(cors());
 app.use("/media", express.static(path.join(__dirname, "media")));
 
