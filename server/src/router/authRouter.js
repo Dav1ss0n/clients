@@ -1,15 +1,11 @@
 const express = require("express");
 const { body } = require('express-validator');
 const authController = require('../controllers/authController');
-const multer = require('multer');
+const roleMiddleware = require("../middlewares/roleMiddleware");
 
 
 
 const router = express.Router();
-
-
-
-router.use(multer().array());
 
 
 
@@ -27,7 +23,7 @@ router.post(
   '/login',
   [
     body('email').isEmail().withMessage('Invalid email address'),
-    body('password').trim().isLength({min: 6}).withMessage('Password must be longer than 6 characters'),
+    body('password').trim().isLength({min: 1}).withMessage('Password must contain something'),
   ],
   authController.login
 );
@@ -35,6 +31,7 @@ router.post(
 // logout route
 router.post(
   '/logout',
+  roleMiddleware([]),
   authController.logout
 );
 

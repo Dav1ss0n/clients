@@ -1,38 +1,43 @@
-const jwt = require("jsonwebtoken"),
-  secret = process.env.JWT_SECRET,
-  responser = require("../responser.js");
+const tokenService = require("../services/tokenService.js");
+const Role = require("../models/roleModel.js");
+const responser = require("../utils/responser.js");
+const logger = require("../utils/logger.js");
 
-module.exports = function (roles) {
-  return function (req, res, next) {
-    if (req.method === "OPTIONS") {
-      next();
-    }
 
+
+module.exports =  function (roles) {
+  return async function (req, res, next) {
     try {
       if (!req.cookies || !req.cookies.token) {
-        responser.Unauthorized(res, "");
+        return responser.Unauthorized(res, "Role Middleware");
       }
       const token = req.cookies.token;
-
-      const { roles: userRoles } = jwt.verify(token, secret);
-
-      if (roles.length) {
-        // если переданы роли то проверяем что есть хотя бы одна из заданных
-        const hasRole = userRoles.some((role) => roles.includes(role));
-
-        if (!hasRole) {
-          return res.status(403).json({ message: "Forbidden" });
+      const userRole = tokenService.validateToken(token).role;
+      
+      if (roles) {
+        // роли переданы
+        const allowedRoles = await Role.find({name: {$in: roles}});
+        const roleNames = allowedRoles.map(r => r.name);
+        
+        if (roleNames.includes(userRole)) {
+          return next();
+        } else {
+          return res.sendStatus(403);
         }
       } else {
-        // если роли не заданы, проверяем что есть хотя бы одна роль
-        if (!userRoles.length) {
-          return res.status(403).json({ message: "Forbidden" });
+        // роли не переданы
+        const allRoles = await Role.find({});
+        const roleNames = allRoles.map(r => r.name);
+        
+        // Проверяем, что роли пользователя есть в базе
+        if (roleNames.includes(userRole)) {
+          return next();
+        } else {
+          return res.sendStatus(403);
         }
       }
-
-      next();
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      logger.error(new Error(error));
       responser.InternalServerError(res, "Role Middleware");
     }
   };

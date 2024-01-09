@@ -18,9 +18,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  roles: {
-    type: [String],
-    default: ['User']
+  role: {
+    type: String,
+    ref: 'Role',
+    default: 'User'
   }
 }, { timestamps: true });
 

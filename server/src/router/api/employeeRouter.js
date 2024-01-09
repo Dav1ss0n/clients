@@ -1,5 +1,4 @@
 const express = require("express");
-const multer = require("multer");
 const {body} = require('express-validator');
 const roleMiddleware = require('../../middlewares/roleMiddleware');
 const employeeController = require("../../controllers/employeeController");
@@ -16,14 +15,8 @@ router.use(express.urlencoded({ extended: true }));
 
 
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
-
-
 router.post(
     '/add', 
-    upload.single(),
     [
         body('name').isLength({min: 4}).withMessage('Name is required'),
         body("bio").isLength({min:4, max: 120})
@@ -34,7 +27,6 @@ router.post(
 
 router.post(
     '/add/@:businessEmail', 
-    upload.single(),
     [
         body('name').isLength({min: 4}).withMessage('Name is required'),
         body('email').isEmail().withMessage('Email is required'),
@@ -45,7 +37,6 @@ router.post(
 
 router.post(
     '/edit/@:clerkId', 
-    upload.single(),
     [
         body('name').isLength({min: 4}).withMessage('Name is required'),
     ],

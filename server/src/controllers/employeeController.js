@@ -1,7 +1,7 @@
 const
     tokenService = require("../services/tokenService"),
 
-    Clerk = require("../models/clerkModel"),
+    Clerk = require("../models/employeeModel"),
     User = require("../models/userModel"),
     Business = require("../models/businessModel"),
     

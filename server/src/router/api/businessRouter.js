@@ -1,22 +1,15 @@
 const express = require("express");
-const multer = require("multer");
 const { body } = require("express-validator");
 const roleMiddleware = require("../..//middlewares/roleMiddleware");
 const businessController = require("../../controllers/businessController");
 
 
 const router = express.Router();
-router.use(express.json());
-router.use(express.urlencoded({ extended: true }));
 
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 
 router.post(
   "/create",
-  upload.single("logo"),
   [
     body("description").notEmpty().withMessage("Description is required"),
     body("category").notEmpty().withMessage("Category wasn't chosen"),
@@ -31,7 +24,6 @@ router.post(
 
 router.post(
   "/edit",
-  upload.single("logo"),
   [
     body("description").notEmpty().withMessage("Description is required"),
     body("category").notEmpty().withMessage("Category wasn't chosen"),
@@ -46,7 +38,6 @@ router.post(
 
 router.post(
   "/edit/@:email",
-  upload.single("logo"),
   [
     body("description").notEmpty().withMessage("Description is required"),
     body("category").notEmpty().withMessage("Category wasn't chosen"),

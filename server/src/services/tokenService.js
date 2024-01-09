@@ -2,10 +2,10 @@ const
     jwt = require("jsonwebtoken"),
     secret = process.env.JWT_SECRET;
 
-module.exports.generateAccessToken = (userId, roles) => {
+module.exports.generateAccessToken = (userId, role) => {
     const payload = {
         userId,
-        roles
+        role
     }
     return jwt.sign(payload, secret, {expiresIn: "1y"} )
 }

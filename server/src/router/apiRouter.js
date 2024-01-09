@@ -7,7 +7,6 @@ const userRouter = require("./api/userRouter");
 
 
 const router = express.Router();
-router.use(multer().array());
 
 
 

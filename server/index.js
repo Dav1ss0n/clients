@@ -2,6 +2,7 @@ require("dotenv").config();
 
 /* REQUIRES */
 const express = require("express");
+const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -19,6 +20,7 @@ const apiRouter = require("./src/router/apiRouter");
 // *? const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.json());
+app.use(fileUpload());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("combined"));
