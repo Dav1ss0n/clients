@@ -1,254 +1,146 @@
-const 
-    {validationResult} = require('express-validator'),
-    tokenService = require("../services/tokenService"),
-    User = require("../models/userModel"),
-    Business = require("../models/businessModel"),
-    bcrypt = require("bcrypt"),
-    jwt = require('jsonwebtoken'),
-    fs = require("fs"),
-    path = require("path"),
-    crypto = require("crypto");
+const bcrypt = require("bcrypt");
+const { validationResult } = require("express-validator");
+const tokenService = require("../services/tokenService");
+const User = require("../models/userModel");
+const Business = require("../models/businessModel");
+const logger = require("../utils/logger");
+const responser = require("../utils/responser");
 
 
 
 class BusinessController {
-    async create(req, res) {
-        try {
-            // validate user input using express-validator
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res
-                    .status(422)
-                    .json({
-                        errors: errors.array()
-                    });
-            }
+  
+  async createBusinessUser(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return responser.BadRequest(res, "Request validator", errors.array());
+      }
 
-            const {description, category, location} = req.body;
-            
-            const token = req.cookies['token'];
-            const accountID = tokenService.validateToken(token).userId;
+      const { email, username, password, role } = req.body;
 
-            //checking the db for existence of business with same id
-            const existingBusiness = await Business.findOne({ownerId: accountID});
-            if (existingBusiness) {
-                return res
-                    .status(422)
-                    .json({
-                        message: 'Business already exists'
-                    });
-            }
+      // check if user with same email or username already exists
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return responser.Conflict(
+          res,
+          "Request validator",
+          `Email is already in use`
+        );
+      }
 
-            const logo = req.file;
-			let filename;
+      // hash password using bcrypt
+      const hashedPassword = await bcrypt.hash(password, 12);
 
-			if (logo) {
-				//generating random filename
-				const fileExtension = path.extname(logo.originalname);
-				const randomString = crypto.randomBytes(12).toString('hex');
-				filename = randomString + fileExtension;
-	
-				fs.writeFile(`${process.env.MEDIA_FOLDER}/${filename}`, logo.buffer, (err) => {
-					if (err) {
-						console.error(err);
-						return res
-							.status(500)
-							.json({
-								message: 'Failed to save file'
-							});
-					}
-				});
-			} else {
-				filename = null;
-			}
+      // create new user in MongoDB database using Mongoose
+      const newUser = new User({
+        email,
+        password: hashedPassword,
+        username,
+        role,
+      });
+      await newUser.save();
 
-            
+      // create and sign JWT token with secret key
+      const token = tokenService.generateAccessToken(newUser._id, "Business");
 
-            //creating and saving a new business
-            const newBusiness = new Business({
-                ownerId: accountID,
-                description,
-                category,
-                location,
-                logo: filename,
-            });
-            await newBusiness.save();
+      // set JWT token as cookie
+      res.cookie("token", token, {
+        httpOnly: true,
+        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 day in milliseconds
+      });
 
-            return res
-                .status(201)
-                .json({
-                    message: 'Business created successfully'
-                });
-
-            
-        } catch (err) {
-            console.error(err);
-            return res
-                .status(500)
-                .json({
-                    message: 'Server error',
-                    ini: 'Create businesses system',
-                    err
-                });
-        }
+      // send response to the client
+      logger.info(`A new business user {${newUser._id}} was registered`);
+      return res.sendStatus(201);
+    } catch (error) {
+      logger.error(new Error(error));
+      return responser.InternalServerError(
+        res,
+        "~createBusinessUser~ function"
+      );
     }
+  }
 
-    async edit(req, res) {
-        try {
-            // validate user input using express-validator
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                return res
-                    .status(422)
-                    .json({
-                        errors: errors.array()
-                    });
-            }
-			
-            // receinving email from the request parameters
-            const email = req.params['email'];
-
-            // receiving the list of updated fields
-            const updatedFields = req.body;
-
-            // preparing the variable with the data to send as response
-            let result;
-
-            //checking for the email in case if it was entered
-            if (!email) {
-                // no email = request was sent from the business account on the client side
-                // taking account id from the cookie-tooken
-                const token = req.cookies.token;
-                const accountId = tokenService.validateToken(token).userId;
-                
-                // updating the document in the database by id
-                // binding result to the variable
-                result = await Business.findOneAndUpdate({ownerId: accountId}, {$set: updatedFields});
-            } else {
-                // email = request was sent from Staff account
-
-                // updating the document in the database by the email
-                // binding result to the variable
-                result = await Business.findOneAndUpdate({email}, {$set: updatedFields});
-            }
-
-            // checking if the document was found and updated
-            if (!result) {
-                return res
-                    .status(404)
-                    .json({
-                        message: 'No matching business found'
-                    });
-            }
-
-            // sending the response
-            return res
-                .status(201)
-                .json({
-                    message: 'Changes were saved',
-                    result
-                });
-        } catch (err) {
-            console.error(err);
-            return res
-                .status(500)
-                .json({
-                    message: 'Server error',
-                    ini: 'Edit businesses system',
-					err
-                });
-        }
+  async createBusinessProfile(req, res) {
+    try {
+      
+    } catch (error) {
+      logger.error(new Error(error));
+      return responser.InternalServerError(
+        res,
+        "~createBusinessProfile~ function"
+      );
     }
+  }
+  async getBusiness(req, res) {
+    try {
+      // receiving user id and checking for its value
+      const token = req.cookies.token;
+      const accountId = tokenService.validateToken(token).userId;
 
-    async delete(req, res) {
-        try {
-            // receinving email from the request parameters
-            const email = req.params['email'];
-
-            // receiving the list of updated fields
-            const updatedFields = req.body;
-
-            // preparing the variable with the data to send as response
-            let result;
-
-            //checking for the email in case if it was entered
-            if (!email) {
-                // no email = request was sent from the business account on the client side
-                // taking account id from the cookie-tooken
-                const token = req.cookies.token;
-                const accountId = tokenService.validateToken(token).userId;
-                
-                // deleting the business profile data in the database by id
-                // binding result to the variable
-                result = await Business.deleteOne({ ownerId: accountId });
-
-                if (!result) {
-                    return res
-                        .status(404)
-                        .json({
-                            message: 'Mathcing business was not found'
-                        });
-                }
-
-                // deleting all the associated documents from database
-
-                // ...
-                // ...
-                // ...
-                // ...
-                // ...
-
-            } else {
-                // email = request was sent from Staff account
-
-                // deleting the document in the database by the email
-                // binding result to the variable
-                result = await Business.deleteOne({ email });
-
-				if (!result) {
-                    return res
-                        .status(404)
-                        .json({
-                            message: 'Mathcing business was not found'
-                        });
-                }
-
-                // deleting all the associated documents from database
-
-                // ...
-                // ...
-                // ...
-                // ...
-                // ...
-            }
-
-            // checking if the document was found and updated
-            if (!result) {
-                return res
-                    .status(404)
-                    .json({
-                        message: 'No matching business found'
-                    });
-            }
-
-            // sending the response
-            return res
-                .status(201)
-                .json({
-                    message: 'Changes were saved',
-                    result
-                });
-        } catch (err) {
-			console.error(err);
-            return res
-                .status(500)
-                .json({
-                    message: 'Server error',
-                    ini: 'Delete businesses system',
-					err
-                });
-        }
+      const account = await User.findOne({_id: accountId}).select('-password').exec();
+      const profile = await Business.findOne({ownerId: accountId});
+      return res.json({
+        account,
+        profile
+      });
+    } catch (error) {
+      logger.error(new Error(error));
+      return responser.InternalServerError(
+        res,
+        "~createBusinessProfile~ function"
+      );
     }
+  }
+
+  async getBusinessById(req, res) {
+    try {
+      const accountId = req.params.accountId;
+      const account = await User.findOne({_id: accountId}).select('-password').exec();
+      if (!account) {
+        return responser.NotFound(res);
+      } else if (account.role !== "Business") {
+        return responser.BadRequest(res, undefined, "Invalid user");
+      }
+
+      const profile = await Business.findOne({ownerId: accountId});
+      return res.json({
+        account,
+        profile
+      });
+    } catch (error) {
+      logger.error(new Error(error));
+      return responser.InternalServerError(
+        res,
+        "~createBusinessProfile~ function"
+      );
+    }
+  }
+
+  async getBusinesses(req, res) {
+    try {
+      const accounts = await User.find({role: "Business"}).select('-password').exec();
+
+      const businesses = [];
+      for (let account of accounts) {
+        let profile = await Business.findOne({ownerId: account._id});
+        
+        businesses.push({
+          ...account._doc,
+            profile: profile ? profile : null
+        });
+      }
+
+      return res.json(businesses);
+    } catch (error) {
+      logger.error(new Error(error));
+      return responser.InternalServerError(
+        res,
+        "~createBusinessProfile~ function"
+      );
+    }
+  }
 }
 
 module.exports = new BusinessController();

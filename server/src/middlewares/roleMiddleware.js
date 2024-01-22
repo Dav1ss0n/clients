@@ -14,7 +14,7 @@ module.exports =  function (roles) {
       const token = req.cookies.token;
       const userRole = tokenService.validateToken(token).role;
       
-      if (roles) {
+      if (roles) {  
         // роли переданы
         const allowedRoles = await Role.find({name: {$in: roles}});
         const roleNames = allowedRoles.map(r => r.name);

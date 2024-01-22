@@ -1,6 +1,7 @@
 const express = require("express");
 const { body } = require("express-validator");
 const roleMiddleware = require("../..//middlewares/roleMiddleware");
+const assignmentMiddleware = require("../..//middlewares/assignmentMiddleware");
 const businessController = require("../../controllers/businessController");
 
 
@@ -9,61 +10,24 @@ const router = express.Router();
 
 
 router.post(
-  "/create",
-  [
-    body("description").notEmpty().withMessage("Description is required"),
-    body("category").notEmpty().withMessage("Category wasn't chosen"),
-    body("location.address").notEmpty().withMessage("Address is required"),
-    body("location.coordinates")
-      .notEmpty()
-      .withMessage("Coordinates are required"),
-  ],
-  roleMiddleware(["Business", "Staff", "Head Staff"]),
-  businessController.create
+  "/", 
+  body('email').isEmail().withMessage('Invalid email address'),
+  body('password').trim().isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('username').trim().isLength({ min: 3 }).withMessage('Username is required'),
+  assignmentMiddleware,
+  businessController.createBusinessUser
 );
-
 router.post(
-  "/edit",
-  [
-    body("description").notEmpty().withMessage("Description is required"),
-    body("category").notEmpty().withMessage("Category wasn't chosen"),
-    body("location.address").notEmpty().withMessage("Address is required"),
-    body("location.coordinates")
-      .notEmpty()
-      .withMessage("Coordinates are required"),
-  ],
-  roleMiddleware(["Business"]),
-  businessController.edit
+  '/me',
+  businessController.createBusinessProfile    
 );
 
-router.post(
-  "/edit/@:email",
-  [
-    body("description").notEmpty().withMessage("Description is required"),
-    body("category").notEmpty().withMessage("Category wasn't chosen"),
-    body("location.address").notEmpty().withMessage("Address is required"),
-    body("location.coordinates")
-      .notEmpty()
-      .withMessage("Coordinates are required"),
-  ],
-  roleMiddleware(["Staff", "Head Staff"]),
-  businessController.edit
-);
+router.get("/me", roleMiddleware(['Business']),  businessController.getBusiness);
+router.get("/:accountId", roleMiddleware(['Staff', 'Head Staff']), businessController.getBusinessById);
+router.get("/", businessController.getBusinesses);
 
-router.delete(
-  "/delete",
-  roleMiddleware(["Business"]),
-  businessController.delete
-);
 
-router.delete(
-  "/delete/@:email",
-  roleMiddleware(["Staff", "Head Staff"]),
-  businessController.delete
-);
-router.use("/", (req, res) => {
-  res.status(404).end("Not found");
-});
+
 
 
 module.exports = router;
